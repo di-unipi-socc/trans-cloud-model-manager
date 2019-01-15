@@ -1,0 +1,19 @@
+{
+	"app": "SoftcareApp",
+	"plan": [{
+			"node": "SoftcareDB",
+			"interface": "tosca.lifecycle.Standard",
+			"operation": "start"
+		},
+		{
+			"node": "SoftcareWS",
+			"interface": "tosca.lifecycle.Standard",
+			"operation": "start"
+		},
+		{
+			"node": "Softcare_dashboard",
+			"interface": "tosca.lifecycle.Standard",
+			"operation": "start"
+		}
+	]
+}
