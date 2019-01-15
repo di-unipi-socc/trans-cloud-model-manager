@@ -1,0 +1,10 @@
+## Service configuration file 
+---
+aliveMsg: "The management analyser is up and running"
+
+server:
+    type: simple
+    applicationContextPath: /
+    connector: 
+        type: http
+        port: 8080
