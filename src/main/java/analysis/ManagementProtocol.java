@@ -73,7 +73,27 @@ public class ManagementProtocol {
         tau.put(stateName, new ArrayList());
         phi.put(stateName, new ArrayList());
     }
+
+    public List<String> getStates() {
+        return this.states;
+    } 
     
+    public Map<String,List<String>> getRho() {
+        return this.rho;
+    }
+
+    public Map<String,List<String>> getGamma() {
+        return this.gamma;
+    }
+
+    public Map<String,List<Transition>> getTau() {
+        return this.tau;
+    }
+
+    public Map<String,List<String>> getPhi() {
+        return this.phi;
+    }
+            
     @Override
     public String toString() {
         return "{ states: " + this.states +
