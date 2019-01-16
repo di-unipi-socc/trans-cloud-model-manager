@@ -8,6 +8,7 @@ import java.util.Map;
 public class ManagementProtocol {
     
     private final List<String> states;
+    private final String initialState;
     // rho - function associating states with the requirements they need
     private final Map<String,List<String>> rho;
     // gamma - function associating states with the capabilities they provide
@@ -27,6 +28,7 @@ public class ManagementProtocol {
                 
         // States
         createState("unavailable");
+        initialState = "unavailable";
         createState("started");
         createState("stopped");
         createState("failed");
@@ -55,11 +57,13 @@ public class ManagementProtocol {
     }
     
     public ManagementProtocol(List<String> states,
+            String initialState,
             Map<String,List<String>> rho,
             Map<String,List<String>> gamma,
             Map<String,List<Transition>> tau,
             Map<String,List<String>> phi) {
         this.states = states;
+        this.initialState = initialState;
         this.rho = rho;
         this.gamma = gamma;
         this.tau = tau;
