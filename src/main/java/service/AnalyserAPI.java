@@ -26,6 +26,8 @@ public class AnalyserAPI {
     private final String aliveMsg;
     private final Map<String,Application> apps;
     
+    // TODO : Add persistent storage of apps
+    
     public AnalyserAPI(String aliveMsg) {
         this.aliveMsg = aliveMsg;
         this.apps = new HashMap<String,Application>();
@@ -43,9 +45,6 @@ public class AnalyserAPI {
     // Method for POSTing a new application
     @POST
     public Response addApp(String tosca) {
-        // TODO: Add Response - to manage HTTP codes and the like
-        // TODO: Add parsing of app and creation of representation
-        // TODO: Add storing of created apps 
         // TODO: Add parsing/generation of management protocols
         
         Yaml yaml = new Yaml(); 
@@ -94,11 +93,17 @@ public class AnalyserAPI {
                         bindings.put(reqId, new ArrayList<String>());
                     
                     // Filling the requirement binding with the target capability
-                    // TODO : consider single line requirement assignment 
-                    // TODO : include possibility of not specifying capability name
                     Map<String,Object> reqInfo = (Map) reqMap.get(reqName);
                     String targetNode = (String) reqInfo.get("node");
                     String targetCap = (String) reqInfo.get("capability");
+                    
+                    // TODO : consider single line requirement assignment 
+                    // TODO : include possibility of not specifying capability name
+                    if(targetNode == null || targetCap == null)
+                        return Response.status(Status.BAD_REQUEST)
+                                .entity("Missing 'node' or 'capability' in req " + reqId)
+                                .type(MediaType.TEXT_PLAIN)
+                                .build();
                     
                     bindings.get(reqId).add(targetNode + "/" + targetCap);
                 }
