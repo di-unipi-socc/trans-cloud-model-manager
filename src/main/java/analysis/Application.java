@@ -1,6 +1,7 @@
 package analysis;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,9 @@ public class Application {
     // the list of capabilities ("nodeName/capName") satisfying it 
     private final Map<String,List<String>> binding;
     
-    // TODO: Add global states/plans
+    // Map of maps, allowing to retrieve the sequence of operations ("node/operation") 
+    // from global state "state|..|state" to global state "state|..|state"  
+    private final Map<String,Map<String,List<String>>> plans;
     
     public Application(
             List<String> nodeNames,
@@ -20,13 +23,20 @@ public class Application {
             Map<String,List<String>> caps,
             Map<String,List<String>> binding
     ) {    
+        // Creating nodes
         nodes = new ArrayList<Node>();
         for(String nName : nodeNames) {
             Node n = new Node(nName,reqs.get(nName),caps.get(nName));
             nodes.add(n);
         }
         
+        // Updating binding
         this.binding = binding;
+        
+        // Computing all possible plans from each global state to each other
+        this.plans = new HashMap<String,Map<String,List<String>>>();
+        
+        // TODO: Add computation of global states/plans
     }
    
     public List<Node> getNodes() {
