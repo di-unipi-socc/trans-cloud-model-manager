@@ -7,15 +7,15 @@ import java.util.Map;
 
 public class ManagementProtocol {
     
-    private List<String> states;
+    private final List<String> states;
     // rho - function associating states with the requirements they need
-    private Map<String,List<String>> rho;
+    private final Map<String,List<String>> rho;
     // gamma - function associating states with the capabilities they provide
-    private Map<String,List<String>> gamma;
+    private final Map<String,List<String>> gamma;
     // tau - transition relation
-    private Map<String,List<Transition>> tau;
+    private final Map<String,List<Transition>> tau;
     // phi - fault handling transition relation
-    private Map<String,List<String>> phi;
+    private final Map<String,List<String>> phi;
     
     // Constructor for obtaining default (Brooklyn) management protocol
     public ManagementProtocol(List<String> reqs, List<String> caps) {

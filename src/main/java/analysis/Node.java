@@ -4,10 +4,10 @@ import java.util.List;
 
 public class Node {
     
-    private String name;
-    private List<String> requirements;
-    private List<String> capabilities;
-    private ManagementProtocol protocol;
+    private final String name;
+    private final List<String> requirements;
+    private final List<String> capabilities;
+    private final ManagementProtocol protocol;
     
     public Node(String name,
             List<String> requirements,

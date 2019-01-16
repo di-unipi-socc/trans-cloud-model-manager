@@ -4,10 +4,10 @@ import java.util.List;
 
 public class Transition {
     
-    private String operation;
-    private List<String> requirements;
-    private List<String> capabilities;
-    private String targetState;
+    private final String operation;
+    private final List<String> requirements;
+    private final List<String> capabilities;
+    private final String targetState;
     
     public Transition(String operation,
             List<String> requirements, 
