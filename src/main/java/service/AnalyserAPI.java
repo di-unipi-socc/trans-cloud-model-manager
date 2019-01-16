@@ -65,6 +65,22 @@ public class AnalyserAPI {
                     .type(MediaType.TEXT_PLAIN)
                     .build();
                     
+        // ==================
+        // Parsing node types
+        // ==================
+        
+        // TODO : add parsing of normative node types
+        
+        Map<String,Object> nodeTypes = (Map) spec.get("node_types");
+        Map<String,List<String>> nodeTypeCaps = new HashMap<String,List<String>>();
+        for (String nodeTypeName : nodeTypes.keySet()) {
+            Map<String,Object> nodeType = (Map) nodeTypes.get(nodeTypeName);
+            nodeTypeCaps.put(nodeTypeName, new ArrayList<String>());
+            Map<String,Object> capDefs = (Map) nodeType.get("capabilities");
+            for(String capName : capDefs.keySet())
+                nodeTypeCaps.get(nodeTypeName).add(capName);
+        }
+        
         // ============================
         // Parsing application topology
         // ============================
@@ -72,21 +88,46 @@ public class AnalyserAPI {
         List<String> nodeNames;
         Map<String,List<String>> bindings = new HashMap<String,List<String>>();
         
-        // Parsing node names
+        // Parsing node template names
         Map<String,Object> nodes = (Map) topology.get("node_templates");
         Set<String> nodeSet = nodes.keySet();
         nodeNames = new ArrayList<String>(nodeSet);
         
+        // Creating maps for node capabilities and requirements
+        Map<String,List<String>> caps = new HashMap<String,List<String>>();
+        Map<String,List<String>> reqs = new HashMap<String,List<String>>();
+        
         // Parsing relationships
         for (String nodeName : nodeNames) {
             Map<String,Object> node = (Map) nodes.get(nodeName);
-            List<Map<String,Object>> nodeReqs = (List) node.get("requirements");
             
+            // Adding the node to the maps of requirements and capabilities
+            caps.put(nodeName, new ArrayList<String>());
+            reqs.put(nodeName, new ArrayList<String>());
+            
+            // Parsing node capabilities
+            String nodeTypeName = (String) node.get("type");
+            for(String cap : nodeTypeCaps.get(nodeTypeName))
+                caps.get(nodeName).add(cap);
+            Map<String,Object> nodeCaps = (Map) node.get("capabilities");
+            if(nodeCaps != null) {
+                for(String capName : nodeCaps.keySet()) {
+                    if(!caps.get(nodeName).contains(capName))
+                        caps.get(nodeName).add(capName);
+                }
+            }
+
+            // Parsing node requirements and corresponding bindings
+            List<Map<String,Object>> nodeReqs = (List) node.get("requirements");
             if(nodeReqs != null) {
                 for(Map reqMap : nodeReqs) {
                     // Parsing requirement name
                     String reqName = (String) reqMap.keySet().iterator().next();
                     String reqId = nodeName + "/" + reqName;
+                    
+                    // Adding requirement name to the map of requirements
+                    if(!reqs.get(nodeName).contains(reqName))
+                        reqs.get(nodeName).add(reqName);
                     
                     // Creating a new binding for the requirement (if not already there)
                     if(!bindings.containsKey(reqId))
@@ -110,7 +151,7 @@ public class AnalyserAPI {
             }
         }
         
-        Application app = new Application(nodeNames,bindings);
+        Application app = new Application(nodeNames,reqs,caps,bindings);
         apps.put(appName,app);
         System.out.println(app.toString());
               

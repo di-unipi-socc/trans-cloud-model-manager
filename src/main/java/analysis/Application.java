@@ -16,11 +16,14 @@ public class Application {
     
     public Application(
             List<String> nodeNames,
+            Map<String,List<String>> reqs,
+            Map<String,List<String>> caps,
             Map<String,List<String>> binding
     ) {    
         nodes = new ArrayList<Node>();
         for(String nName : nodeNames) {
-            nodes.add(new Node(nName));
+            Node n = new Node(nName,reqs.get(nName),caps.get(nName));
+            nodes.add(n);
         }
         
         this.binding = binding;
