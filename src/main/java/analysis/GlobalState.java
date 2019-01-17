@@ -24,6 +24,10 @@ public class GlobalState {
         stateMapping.put(node,state);
     }
     
+    public void addMapping(Map<String,String> mapping) {
+        stateMapping.putAll(mapping);
+    }
+    
     public void addMapping(GlobalState g) {
         stateMapping.putAll(g.getMapping());
     }

@@ -137,5 +137,68 @@ public class Planner {
             // System.out.println("\n** GLOBAL STATE ** \n " + g);
         }
     }
-    
+ 
+    // Method for retrieving the (cheapest) sequence of steps for changing the
+    // the configuration of the application from "start" to "target"
+    public List<String> getSequentialPlan(Map<String,String> start, Map<String,String> target) {
+        List<String> opSequence = new ArrayList();
+        
+        // Identifying global states corresponding to start and target
+        GlobalState s = new GlobalState(nodes,binding);
+        s.addMapping(start);
+        GlobalState t = new GlobalState(nodes,binding);
+        t.addMapping(target);
+        for(GlobalState g : globalStates) {
+            if(s.equals(g)) s = g;
+            else if(t.equals(g)) t = g;
+        }
+        
+        // ==========================================
+        // Computing the (cheapest) sequence of steps
+        // ==========================================
+        
+        // Maps of steps and cost from the global state s to the others
+        Map<GlobalState,List<String>> steps = new HashMap();
+        steps.put(s,new ArrayList());
+        Map<GlobalState,Integer> costs = new HashMap();
+        costs.put(s,0);
+        // List of visited states
+        List<GlobalState> visited = new ArrayList();
+        visited.add(s);
+
+        // List of global states still to be visited
+        List<GlobalState> toBeVisited = new ArrayList();
+        
+        // Adding the states reachable from start to "toBeVisited"
+        for(Step step : s.getSteps()) {
+            GlobalState next = step.getNextGlobalState();
+            // Adding the sequence of operations towards "next" 
+            List<String> opSeq = new ArrayList();
+            if(step.getReason().contains(Step.handling))
+                opSeq.add(step.getReason());
+            steps.put(next,opSeq);
+            // Adding the cost of the sequence of operation towards "next"
+            costs.put(next,step.getCost());
+            toBeVisited.add(next);
+        }
+        
+        // Exploring the graph of global states by exploiting "toBeVisited"
+        while(toBeVisited.size() > 0) {
+            // Removing the first global state to be visited and marking it
+            // as visited
+            GlobalState current = toBeVisited.remove(0);
+            visited.add(current);
+            
+            for(Step step : current.getSteps()) {
+                GlobalState next = step.getNextGlobalState();
+                // Adding the sequence of operations from "start" to "next"
+                // (if more convenient)
+                
+                // TODO!!!!!!!!!!!!!
+            }
+            // TODO : Compute sequence of steps            
+        }
+        
+        return opSequence;
+    }
 }
