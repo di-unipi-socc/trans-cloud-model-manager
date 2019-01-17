@@ -32,6 +32,9 @@ public class Node {
         return capabilities;
     }
     
+    public ManagementProtocol getProtocol() {
+        return protocol;
+    }
     public boolean is(String name) {
         return (this.name.equals(name));
     }
