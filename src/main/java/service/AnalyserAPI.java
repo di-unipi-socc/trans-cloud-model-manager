@@ -153,7 +153,7 @@ public class AnalyserAPI {
         
         Application app = new Application(nodeNames,reqs,caps,bindings);
         apps.put(appName,app);
-        System.out.println(app.toString());
+        //System.out.println(app.toString());
               
         // A URI for the posted app is created and returned with "201 Created"
         URI appUri = UriBuilder.fromResource(AnalyserAPI.class).path(appName).build();

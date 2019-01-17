@@ -45,12 +45,12 @@ public class ManagementProtocol {
         
         // tau
         List<String> none = new ArrayList<String>();
-        tau.get("unavailable").add(new Transition("start",reqs,none,"started"));
-        tau.get("started").add(new Transition("release",none,none,"unavailable"));
-        tau.get("started").add(new Transition("stop",none,none,"stopped"));
-        tau.get("stopped").add(new Transition("release",none,none,"unavailable"));
-        tau.get("stopped").add(new Transition("start",reqs,none,"started"));
-        tau.get("failed").add(new Transition("release",none,none,"unavailable"));
+        tau.get("unavailable").add(new Transition("Lifecycle/start",reqs,none,"started"));
+        tau.get("started").add(new Transition("Lifecycle/release",none,none,"unavailable"));
+        tau.get("started").add(new Transition("Lifecycle/stop",none,none,"stopped"));
+        tau.get("stopped").add(new Transition("Lifecycle/release",none,none,"unavailable"));
+        tau.get("stopped").add(new Transition("Lifecycle/start",reqs,none,"started"));
+        tau.get("failed").add(new Transition("Lifecycle/release",none,none,"unavailable"));
                 
         // phi
         phi.get("started").add("failed");
