@@ -159,7 +159,27 @@ public class AnalyserAPI {
         URI appUri = UriBuilder.fromResource(AnalyserAPI.class).path(appName).build();
         return Response.created(appUri).build();
     }
-       
+    
+    // Method for retrieving a plan allowing to change the configuration of 
+    // "appName" from the "current" global state to a "target" global state
+    // ("current" and "target" are represented in JSON in "body")
+    @GET
+    @Path("/{appName}/plan")
+    public Response deleteApp(@PathParam("appName") String name, String body) {
+        
+        // TODO : Add parsing of "body" to extract global states
+        
+        // TODO : Invoke planner of "appName" to retrieve plan
+        
+        return Response.status(Status.INTERNAL_SERVER_ERROR)
+                .entity("Method not yet implemented")
+                .type(MediaType.TEXT_PLAIN)
+                .build();
+        
+    }
+    
+    // Method for deleting a previously registered application 
+    // identified by "appName"
     @DELETE
     @Path("/{appName}")
     public Response deleteApp(@PathParam("appName") String name) {
