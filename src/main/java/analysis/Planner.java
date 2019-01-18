@@ -7,20 +7,35 @@ import java.util.Map;
 
 public class Planner {
     
-    // List of all possible global states
+    // Application topology
     private final List<Node> nodes;
     private final Map<String,List<String>> binding;
+    // List of all possible global states
     private final List<GlobalState> globalStates;
     
+    // Current and target global states
+    private GlobalState current;
+    private GlobalState target;
+    
     public Planner(List<Node> nodes, Map<String,List<String>> binding) {
+        // Storing topology
         this.nodes = nodes;
         this.binding = binding;
         
-        // Generating all possible global states
+        // Generating all global states and all possible steps between them
         this.globalStates = generateGlobalStates(nodes);
-        
-        // Generating all possible steps between global states
         generateSteps();
+        
+        // Initialising current and target global states to the initial global state
+        Map<String,String> initialMapping = new HashMap();
+        for(Node n : this.nodes) {
+            String nodeName = n.getName();
+            String initialState = n.getProtocol().getInitialState();
+            initialMapping.put(nodeName,initialState);
+        }
+        GlobalState initialG = search(initialMapping);
+        this.current = initialG;
+        this.target = initialG;
     }
     
     // Private method for generating all possible global states for a given 
@@ -70,16 +85,13 @@ public class Planner {
                                 firable = false;
                         }
                         if(firable) {
-                            // Creating a new global state with the updated 
-                            // mapping for the actual state of n
-                            GlobalState next = new GlobalState(nodes,binding);
-                            next.addMapping(g);
-                            next.addMapping(nName,t.getTargetState());
+                            // Creating a new mapping for the actual state of n
+                            Map<String,String> nextMapping = new HashMap();
+                            nextMapping.putAll(g.getMapping());
+                            nextMapping.put(nName, t.getTargetState());
                             // Searching the ref to the corresponding global 
                             // state in the list globalStates
-                            for(GlobalState g1 : this.globalStates) {
-                                if(g1.equals(next)) next = g1;
-                            }
+                            GlobalState next = search(nextMapping);
                             // Adding the step to list of steps in g
                             g.addStep(new Step(nName,t.getOperation(),next));
                         }
@@ -123,18 +135,13 @@ public class Planner {
                                     targetState = handlingState;
                             }
                         }
-
-
-                        // Creating a new global state with the updated 
-                        // mapping for the actual state of n
-                        GlobalState next = new GlobalState(nodes,binding);
-                        next.addMapping(g);
-                        next.addMapping(nName,targetState);
+                        // Creating a new mapping for the actual state of n
+                        Map<String,String> nextMapping = new HashMap();
+                        nextMapping.putAll(g.getMapping());
+                        nextMapping.put(nName, targetState);
                         // Searching the ref to the corresponding global 
                         // state in the list globalStates
-                        for(GlobalState g1 : this.globalStates) {
-                            if(g1.equals(next)) next = g1;
-                        }
+                        GlobalState next = search(nextMapping);
                         // Adding the step to list of steps in g
                         g.addStep(new Step(nName,next));
                     }
@@ -146,19 +153,10 @@ public class Planner {
  
     // Method for retrieving the (cheapest) sequence of steps for changing the
     // the configuration of the application from "start" to "target"
-    public List<String> getSequentialPlan(Map<String,String> start, Map<String,String> target) {
+    public List<String> getSequentialPlan() {
         // Identifying global states corresponding to start and target
-        GlobalState s = new GlobalState(nodes,binding);
-        s.addMapping(start);
-        GlobalState t = new GlobalState(nodes,binding);
-        t.addMapping(target);
-        for(GlobalState g : globalStates) {
-            if(s.equals(g)) s = g;
-            else if(t.equals(g)) t = g;
-        }
-        
-        //System.out.println("** Start ** \n " + s.getMapping());
-        //System.out.println("** Target ** \n " + t.getMapping());
+        GlobalState s = this.current;
+        GlobalState t = this.target;
         
         // ==========================================
         // Computing the (cheapest) sequence of steps
@@ -238,5 +236,27 @@ public class Planner {
             }
         }
         return opSequence;
+    }
+    
+    // Private method for searching a global state corresponding to a given
+    // "stateMapping" (null, if not found)
+    private GlobalState search(Map<String,String> stateMapping) {
+        GlobalState desired = new GlobalState(nodes,binding);
+        desired.addMapping(stateMapping);
+        for(GlobalState g : globalStates) {
+            if(g.equals(desired))
+                return g;
+        }
+        return null;
+    }
+    
+    public void setCurrent(Map<String,String> stateMapping) {
+        GlobalState currentG = search(stateMapping);
+        this.current = currentG;
+    }
+
+    public void setTarget(Map<String,String> stateMapping) {
+        GlobalState targetG = search(stateMapping);
+        this.target = targetG;
     }
 }

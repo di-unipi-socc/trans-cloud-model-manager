@@ -1,0 +1,23 @@
+{
+	"plan": [{
+		"node": "ForumDB",
+		"operation": "start",
+		"interface": "Lifecycle"
+	}, {
+		"node": "Forum",
+		"operation": "start",
+		"interface": "Lifecycle"
+	}, {
+		"node": "SoftcareDB",
+		"operation": "start",
+		"interface": "Lifecycle"
+	}, {
+		"node": "SoftcareWS",
+		"operation": "start",
+		"interface": "Lifecycle"
+	}, {
+		"node": "Softcare_dashboard",
+		"operation": "start",
+		"interface": "Lifecycle"
+	}]
+}

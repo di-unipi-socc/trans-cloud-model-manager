@@ -2,6 +2,7 @@ package service;
 
 import analysis.Application;
 import analysis.Node;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Set;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -161,41 +163,90 @@ public class AnalyserAPI {
         return Response.created(appUri).build();
     }
     
+    @PUT
+    @Path("/{appName}")
+    public Response setStates(@PathParam("appName") String name, String body) {
+        System.out.println(body);
+        // Processing input parameters
+        Application app = this.apps.get(name);
+        if(app==null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        Map<String,Object> jsonBody;
+        try {
+            jsonBody = new ObjectMapper().readValue(body, HashMap.class);
+        } catch (Exception e) {
+            return Response.status(Status.BAD_REQUEST)
+                    .entity("Request body is not JSON")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build();
+        }
+        // Parsing "jsonBody" to extract global states
+        Map<String,String> start = (Map) jsonBody.get("current");
+        Map<String,String> target = (Map) jsonBody.get("target");
+        System.out.println(start);
+        System.out.println(target);
+
+        // Setting "start", if well-defined
+        if(start != null) {
+            // Checking if start is well-defined
+            for(Node n : app.getNodes()) {
+                String nState = start.get(n.getName());
+                if(nState == null || (!(n.getProtocol().getStates().contains(nState))))
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity("Request body is not properly formatted")
+                            .type(MediaType.TEXT_PLAIN)
+                            .build();
+            }
+            // If here, "start" is well-defined
+            app.setCurrent(start);
+        }
+        
+        // Setting "target", if well-defined
+        if(target != null) {
+            // Checking if start is well-defined
+            for(Node n : app.getNodes()) {
+                String nState = target.get(n.getName());
+                if(nState == null || (!(n.getProtocol().getStates().contains(nState))))
+                    return Response.status(Status.BAD_REQUEST)
+                            .entity("Request body is not properly formatted")
+                            .type(MediaType.TEXT_PLAIN)
+                            .build();
+            }
+            // If here, "target" is well-defined
+            app.setTarget(target);
+        }
+
+        return Response.ok().build();
+    }
+    
     // Method for retrieving a plan allowing to change the configuration of 
     // "appName" from the "current" global state to a "target" global state
     // ("current" and "target" are represented in JSON in "body")
     @GET
     @Path("/{appName}/plan")
-    public Response deleteApp(@PathParam("appName") String name, String body) {
+    public Response getPlan(@PathParam("appName") String name) {
         
+        // Processing input parameters
         Application app = this.apps.get(name);
+        if(app==null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        List<String> ops = app.getSequentialPlan();
         
-        // TODO : Add parsing of "body" to extract global states
-        
-        // TODO : Invoke planner of "appName" to retrieve plan
-        
-                
-        // Trying to get a plan example
-        Map<String,String> unavailable = new HashMap();
-        Map<String,String> started = new HashMap();
-        for(Node n : app.getNodes()) {
-            unavailable.put(n.getName(),"unavailable");
-            started.put(n.getName(),"started");
+        Plan p = new Plan(new ArrayList());
+        for(String op : ops) {
+            String[] opSplit = op.split("/");
+            String nodeName = opSplit[0];
+            String intfName = opSplit[1];
+            String opName = opSplit[2];
+            p.addStep(nodeName, intfName, opName);
         }
         
-        try {
-            List<String> deploymentPlan = app.getPlanner().getSequentialPlan(unavailable,started);
-            System.out.println(deploymentPlan);
-        } catch(Exception e) {
-            System.out.println("error");
-        }
-        
-        
-        return Response.status(Status.INTERNAL_SERVER_ERROR)
-                .entity("Method not yet implemented")
-                .type(MediaType.TEXT_PLAIN)
-                .build();
-        
+        return Response.status(Status.OK)
+                .entity(p)
+                .build();        
     }
     
     // Method for deleting a previously registered application 

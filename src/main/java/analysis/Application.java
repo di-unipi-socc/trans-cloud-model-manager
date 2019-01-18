@@ -43,14 +43,22 @@ public class Application {
         return binding;
     }
     
-    public Planner getPlanner() {
-        return planner;
+    public List<String> getSequentialPlan() {
+        return planner.getSequentialPlan();
     }
     
     public List<String> boundTo(String node, String requirement) {
         return binding.get(node + "." + requirement);
     }
     
+    public void setCurrent(Map<String,String> globalState) {
+        this.planner.setCurrent(globalState);
+    }
+    
+    public void setTarget(Map<String,String> globalState) {
+        this.planner.setTarget(globalState);
+    }
+
     @Override
     public String toString() {
         return "** NODES **\n" + nodes.toString() + 

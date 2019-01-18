@@ -1,0 +1,16 @@
+{
+	"current": {
+		"ForumDB": "unavailable",
+		"SoftcareWS": "unavailable",
+		"Softcare_dashboard": "unavailable",
+		"SoftcareDB": "unavailable",
+		"Forum": "unavailable"
+	},
+	"target": {
+		"ForumDB": "started",
+		"SoftcareWS": "started",
+		"Softcare_dashboard": "started",
+		"SoftcareDB": "started",
+		"Forum": "started"
+	}
+}

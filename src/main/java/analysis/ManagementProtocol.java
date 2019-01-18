@@ -82,6 +82,10 @@ public class ManagementProtocol {
         return this.states;
     } 
     
+    public String getInitialState() {
+        return this.initialState;
+    }
+    
     public Map<String,List<String>> getRho() {
         return this.rho;
     }
