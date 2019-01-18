@@ -13,7 +13,7 @@ public class Application {
     // the list of capabilities ("nodeName/capName") satisfying it 
     private final Map<String,List<String>> binding;
     
-    private final Planner plans;
+    private final Planner planner;
     
     public Application(
             List<String> nodeNames,
@@ -32,7 +32,7 @@ public class Application {
         this.binding = binding;
         
         // Computing all possible plans from each global state to each other
-        this.plans = new Planner(this.nodes,this.binding);
+        this.planner = new Planner(this.nodes,this.binding);
     }
    
     public List<Node> getNodes() {
@@ -41,6 +41,10 @@ public class Application {
     
     public Map<String,List<String>> getBinding() {
         return binding;
+    }
+    
+    public Planner getPlanner() {
+        return planner;
     }
     
     public List<String> boundTo(String node, String requirement) {

@@ -1,6 +1,7 @@
 package service;
 
 import analysis.Application;
+import analysis.Node;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -167,9 +168,28 @@ public class AnalyserAPI {
     @Path("/{appName}/plan")
     public Response deleteApp(@PathParam("appName") String name, String body) {
         
+        Application app = this.apps.get(name);
+        
         // TODO : Add parsing of "body" to extract global states
         
         // TODO : Invoke planner of "appName" to retrieve plan
+        
+                
+        // Trying to get a plan example
+        Map<String,String> unavailable = new HashMap();
+        Map<String,String> started = new HashMap();
+        for(Node n : app.getNodes()) {
+            unavailable.put(n.getName(),"unavailable");
+            started.put(n.getName(),"started");
+        }
+        
+        try {
+            List<String> deploymentPlan = app.getPlanner().getSequentialPlan(unavailable,started);
+            System.out.println(deploymentPlan);
+        } catch(Exception e) {
+            System.out.println("error");
+        }
+        
         
         return Response.status(Status.INTERNAL_SERVER_ERROR)
                 .entity("Method not yet implemented")

@@ -58,12 +58,18 @@ public class Planner {
                 // Identifying all available operation transitions (when there 
                 // are no faults), and adding them as steps
                 List<String> gSatisfiableReqs = g.getSatisfiableReqs();
+                
                 for(Node n : nodes) {
                     String nName = n.getName();
                     String nState = g.getStateOf(nName);
                     List<Transition> nTau = n.getProtocol().getTau().get(nState);
                     for(Transition t : nTau) {
-                        if(gSatisfiableReqs.containsAll(t.getRequirements())) {
+                        boolean firable = true;
+                        for(String req : t.getRequirements()) {
+                            if(!(gSatisfiableReqs.contains(n.getName() + "/" + req)))
+                                firable = false;
+                        }
+                        if(firable) {
                             // Creating a new global state with the updated 
                             // mapping for the actual state of n
                             GlobalState next = new GlobalState(nodes,binding);
@@ -151,6 +157,9 @@ public class Planner {
             else if(t.equals(g)) t = g;
         }
         
+        //System.out.println("** Start ** \n " + s.getMapping());
+        //System.out.println("** Target ** \n " + t.getMapping());
+        
         // ==========================================
         // Computing the (cheapest) sequence of steps
         // ==========================================
@@ -172,6 +181,7 @@ public class Planner {
             GlobalState next = step.getNextGlobalState();
             // Adding the sequence of operations towards "next" 
             List<Step> stepSeq = new ArrayList();
+            stepSeq.add(step);
             steps.put(next,stepSeq);
             // Adding the cost of the sequence of operation towards "next"
             costs.put(next,step.getCost());
@@ -180,12 +190,16 @@ public class Planner {
         
         // Exploring the graph of global states by exploiting "toBeVisited"
         while(toBeVisited.size() > 0) {
+            //System.out.println("States to be visited: " + toBeVisited.size());
             // Removing the first global state to be visited and marking it
             // as visited
             GlobalState current = toBeVisited.remove(0);
+            //System.out.println("  Selected: " + current.getMapping() + 
+            //        "\n  (available steps: " + current.getSteps().size() + ")");
             visited.add(current);
             
             for(Step step : current.getSteps()) {
+                // System.out.println("      Step: " + step.getReason());
                 GlobalState next = step.getNextGlobalState();
                 // Adding the sequence of operations from "start" to "next"
                 // (if more convenient)
@@ -205,15 +219,15 @@ public class Planner {
                     stepSeq.add(step);
                     steps.put(next,stepSeq);
                     costs.put(next, nextCost);
-                    toBeVisited.add(next);
+                    if(!(toBeVisited.contains(next))) toBeVisited.add(next);
+                    //System.out.println("      Added: " + next.getMapping());
                 }
             }
         }
         
-        for(GlobalState g : steps.keySet()) {
-            System.out.println("** " + g.getMapping() + "**");
-            System.out.println(steps.get(s));
-        }
+        //System.out.println("total global states: " + this.globalStates.size());
+        //System.out.println("visited global states: " + visited.size());
+        
         // ====================================================
         // Computing the sequence of operations from "s" to "t"
         // ====================================================
