@@ -156,7 +156,6 @@ public class AnalyserAPI {
         
         Application app = new Application(nodeNames,reqs,caps,bindings);
         apps.put(appName,app);
-        //System.out.println(app.toString());
               
         // A URI for the posted app is created and returned with "201 Created"
         URI appUri = UriBuilder.fromResource(AnalyserAPI.class).path(appName).build();
@@ -166,7 +165,6 @@ public class AnalyserAPI {
     @PUT
     @Path("/{appName}")
     public Response setStates(@PathParam("appName") String name, String body) {
-        System.out.println(body);
         // Processing input parameters
         Application app = this.apps.get(name);
         if(app==null) {
@@ -184,9 +182,7 @@ public class AnalyserAPI {
         // Parsing "jsonBody" to extract global states
         Map<String,String> start = (Map) jsonBody.get("current");
         Map<String,String> target = (Map) jsonBody.get("target");
-        System.out.println(start);
-        System.out.println(target);
-
+        
         // Setting "start", if well-defined
         if(start != null) {
             // Checking if start is well-defined
@@ -233,8 +229,14 @@ public class AnalyserAPI {
             return Response.status(Status.NOT_FOUND).build();
         }
 
+        // Computing the plan
         List<String> ops = app.getSequentialPlan();
         
+        // If plan is not found, return error
+        if(ops == null)
+            return Response.status(Status.NOT_FOUND).build();
+        
+        // Otherwise, return the corresponding plan
         Plan p = new Plan(new ArrayList());
         for(String op : ops) {
             String[] opSplit = op.split("/");
@@ -243,7 +245,6 @@ public class AnalyserAPI {
             String opName = opSplit[2];
             p.addStep(nodeName, intfName, opName);
         }
-        
         return Response.status(Status.OK)
                 .entity(p)
                 .build();        
