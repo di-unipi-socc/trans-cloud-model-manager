@@ -141,8 +141,6 @@ public class Planner {
     // Method for retrieving the (cheapest) sequence of steps for changing the
     // the configuration of the application from "start" to "target"
     public List<String> getSequentialPlan(Map<String,String> start, Map<String,String> target) {
-        List<String> opSequence = new ArrayList();
-        
         // Identifying global states corresponding to start and target
         GlobalState s = new GlobalState(nodes,binding);
         s.addMapping(start);
@@ -158,7 +156,7 @@ public class Planner {
         // ==========================================
         
         // Maps of steps and cost from the global state s to the others
-        Map<GlobalState,List<String>> steps = new HashMap();
+        Map<GlobalState,List<Step>> steps = new HashMap();
         steps.put(s,new ArrayList());
         Map<GlobalState,Integer> costs = new HashMap();
         costs.put(s,0);
@@ -173,10 +171,8 @@ public class Planner {
         for(Step step : s.getSteps()) {
             GlobalState next = step.getNextGlobalState();
             // Adding the sequence of operations towards "next" 
-            List<String> opSeq = new ArrayList();
-            if(step.getReason().contains(Step.handling))
-                opSeq.add(step.getReason());
-            steps.put(next,opSeq);
+            List<Step> stepSeq = new ArrayList();
+            steps.put(next,stepSeq);
             // Adding the cost of the sequence of operation towards "next"
             costs.put(next,step.getCost());
             toBeVisited.add(next);
@@ -193,12 +189,40 @@ public class Planner {
                 GlobalState next = step.getNextGlobalState();
                 // Adding the sequence of operations from "start" to "next"
                 // (if more convenient)
-                
-                // TODO!!!!!!!!!!!!!
+                int nextCost = costs.get(current) + step.getCost();
+                if(visited.contains(next)) {
+                    // If current path is cheaper, updates "steps" and "costs"
+                    if(costs.get(next) > nextCost) {
+                        List<Step> stepSeq = new ArrayList();
+                        stepSeq.addAll(steps.get(current));
+                        stepSeq.add(step);
+                        steps.put(next,stepSeq);
+                        costs.put(next,nextCost);
+                    }
+                } else {
+                    List<Step> stepSeq = new ArrayList();
+                    stepSeq.addAll(steps.get(current));
+                    stepSeq.add(step);
+                    steps.put(next,stepSeq);
+                    costs.put(next, nextCost);
+                    toBeVisited.add(next);
+                }
             }
-            // TODO : Compute sequence of steps            
         }
         
+        for(GlobalState g : steps.keySet()) {
+            System.out.println("** " + g.getMapping() + "**");
+            System.out.println(steps.get(s));
+        }
+        // ====================================================
+        // Computing the sequence of operations from "s" to "t"
+        // ====================================================
+        List<String> opSequence = new ArrayList();
+        for(Step step : steps.get(t)) {
+            if(!(step.getReason().contains(Step.handling))) {
+                opSequence.add(step.getReason());
+            }
+        }
         return opSequence;
     }
 }
