@@ -18,7 +18,7 @@ IMPORTANT: The current version of the **management analyser** requires that each
 
 #### Setting the current and target state of an application
 The current and target state of an application _app_ previously added to the **management analyser** can be updated by issuing
-* a PUT request to the `{host}/mm/app/plan` endpoint,
+* a PUT request to the `{host}/mm/app` endpoint,
 * whose body is a JSON object specifying the `current` and/or `target` state of each node forming _app_ (see [PUT-body](https://github.com/di-unipi-socc/management-analyser-ws/blob/master/data/examples/softcare-byon/PUT-body.json) for a concrete example).
 
 #### Retrieving plans
