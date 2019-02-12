@@ -91,7 +91,7 @@ public class Planner {
                             nextMapping.put(nName, t.getTargetState());
                             // Searching the ref to the corresponding global 
                             // state in the list globalStates
-                            GlobalState next = search(nextMapping);                           
+                            GlobalState next = search(nextMapping);
                             // Adding the step to list of steps in g
                             g.addStep(new Step(nName,t.getOperation(),next));
                         }
@@ -153,24 +153,44 @@ public class Planner {
     // Method for retrieving the (cheapest) sequence of steps for changing the
     // the configuration of the application from "start" to "target"
     public List<String> getSequentialPlan() {
+        List<String> opSequence = new ArrayList();
+        
+        // ==========================================
+        // Computing the initial sequence of steps to
+        // prioritize nodes with failed dependencies
+        // ==========================================
+        GlobalState start = this.current;
+        
+        List<String> nodesWithFailedDeps = start.getNodesInState(ManagementProtocol.failedDependencies);
+        for(String n : nodesWithFailedDeps) {
+            List<Step> steps = start.getSteps();
+            Step nStop = null;
+            for(Step s : steps) {
+                if(s.getReason().contains(n) && s.getReason().contains("stop"))
+                    nStop = s;
+            }
+            opSequence.add(nStop.getReason());
+            start = nStop.getNextGlobalState();
+        }
+
         // ==========================================
         // Computing the (cheapest) sequence of steps
         // ==========================================
         
         // Maps of steps and cost from the global state s to the others
         Map<GlobalState,List<Step>> steps = new HashMap();
-        steps.put(current,new ArrayList());
+        steps.put(start,new ArrayList());
         Map<GlobalState,Integer> costs = new HashMap();
-        costs.put(current,0);
+        costs.put(start,0);
         // List of visited states
         List<GlobalState> visited = new ArrayList();
-        visited.add(current);
+        visited.add(start);
 
         // List of global states still to be visited
         List<GlobalState> toBeVisited = new ArrayList();
         
         // Adding the states reachable from start to "toBeVisited"
-        for(Step step : current.getSteps()) {
+        for(Step step : start.getSteps()) {
             GlobalState next = step.getNextGlobalState();
             // Adding the sequence of operations towards "next" 
             List<Step> stepSeq = new ArrayList();
@@ -187,40 +207,36 @@ public class Planner {
             // as visited
             GlobalState current = toBeVisited.remove(0);
             visited.add(current);
-            
+                        
             for(Step step : current.getSteps()) {
                 GlobalState next = step.getNextGlobalState();
                 // Adding the sequence of operations from "start" to "next"
                 // (if more convenient)
                 int nextCost = costs.get(current) + step.getCost();
-                if(visited.contains(next)) {
-                    // If current path is cheaper, updates "steps" and "costs"
-                    if(costs.get(next) > nextCost) {
+                
+                // If no cost has been computed, or if current path is cheaper,
+                // updates "steps" and "costs"
+                if(costs.get(next) == null || nextCost < costs.get(next).intValue()) {
                         List<Step> stepSeq = new ArrayList();
                         stepSeq.addAll(steps.get(current));
                         stepSeq.add(step);
                         steps.put(next,stepSeq);
                         costs.put(next,nextCost);
-                    }
-                } else {
-                    List<Step> stepSeq = new ArrayList();
-                    stepSeq.addAll(steps.get(current));
-                    stepSeq.add(step);
-                    steps.put(next,stepSeq);
-                    costs.put(next, nextCost);
-                    if(!(toBeVisited.contains(next))) toBeVisited.add(next);
                 }
+                
+                // "next" is to be visited if not already visited
+                if(!(visited.contains(next)) && !(toBeVisited.contains(next))) 
+                    toBeVisited.add(next);
             }
         }
         
         // ====================================================
-        // Computing the sequence of operations from "s" to "t"
+        // Adding the sequence of operations to reach target
         // ====================================================
         // If no plan is available, return null
         if(steps.get(target) == null) 
             return null;
         // Otherwise, return the corresponding sequence of operations
-        List<String> opSequence = new ArrayList();
         for(Step step : steps.get(target)) {
             if(!(step.getReason().contains(Step.handling))) {
                 opSequence.add(step.getReason());
