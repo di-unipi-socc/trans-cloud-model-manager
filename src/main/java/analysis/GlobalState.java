@@ -110,12 +110,24 @@ public class GlobalState {
         return faults.isEmpty();
     }
     
+    // Method for retrieving the node-state mapping
     public Map<String,String> getMapping() {
         return stateMapping;
     }
     
+    // Method for retrieving the state of a node
     public String getStateOf(String node) {
         return stateMapping.get(node);
+    }
+    
+    // Method for retrieving the list of nodes in a given state
+    public List<String> getNodesInState(String state) {
+        List<String> nodes = new ArrayList<String>();
+        for(String n : stateMapping.keySet()) {
+            if(state.equals((String) stateMapping.get(n)))
+                    nodes.add(n);
+        }
+        return nodes;
     }
     
     public List<Step> getSteps() {
