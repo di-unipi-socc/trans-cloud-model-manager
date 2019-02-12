@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class ManagementProtocol {
     
+    public static String failedDependencies = "failed-dependencies";
+    
     private final List<String> states;
     private final String initialState;
     // rho - function associating states with the requirements they need
@@ -32,7 +34,7 @@ public class ManagementProtocol {
         createState("started");
         createState("stopped");
         createState("failed");
-        createState("failed-dependencies");
+        createState(failedDependencies);
         
         // rho
         for(String r : reqs) {
@@ -52,10 +54,10 @@ public class ManagementProtocol {
         tau.get("stopped").add(new Transition("Lifecycle/release",none,none,"unavailable"));
         tau.get("stopped").add(new Transition("Lifecycle/start",reqs,none,"started"));
         tau.get("failed").add(new Transition("Lifecycle/release",none,none,"unavailable"));
-        tau.get("failed-dependencies").add(new Transition("Lifecycle/stop",none,none,"stopped"));
+        tau.get(failedDependencies).add(new Transition("Lifecycle/stop",none,none,"stopped"));
                 
         // phi
-        phi.get("started").add("failed-dependencies");
+        phi.get("started").add(failedDependencies);
     }
     
     public ManagementProtocol(List<String> states,
