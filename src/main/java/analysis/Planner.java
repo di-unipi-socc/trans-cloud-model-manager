@@ -91,7 +91,7 @@ public class Planner {
                             nextMapping.put(nName, t.getTargetState());
                             // Searching the ref to the corresponding global 
                             // state in the list globalStates
-                            GlobalState next = search(nextMapping);
+                            GlobalState next = search(nextMapping);                           
                             // Adding the step to list of steps in g
                             g.addStep(new Step(nName,t.getOperation(),next));
                         }
@@ -240,9 +240,20 @@ public class Planner {
         }
         return null;
     }
-    
+        
     public void setCurrent(Map<String,String> stateMapping) {
         GlobalState currentG = search(stateMapping);
+        
+        // Handle pending failures
+        Step handler;
+        while(currentG.getPendingFaults().size() > 0) {
+            handler = null;
+            for(Step s : currentG.getSteps())
+                if(s.getReason().contains(Step.handling))
+                    handler = s;
+            currentG = handler.getNextGlobalState();
+        }
+        
         this.current = currentG;
     }
 
