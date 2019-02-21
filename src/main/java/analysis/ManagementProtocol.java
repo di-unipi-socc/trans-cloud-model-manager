@@ -52,7 +52,7 @@ public class ManagementProtocol {
         tau.get("started").add(new Transition("Lifecycle/release",none,none,"unavailable"));
         tau.get("started").add(new Transition("Lifecycle/stop",none,none,"stopped"));
         tau.get("stopped").add(new Transition("Lifecycle/release",none,none,"unavailable"));
-        tau.get("stopped").add(new Transition("Lifecycle/start",reqs,none,"started"));
+        tau.get("stopped").add(new Transition("Lifecycle/restart",reqs,none,"started"));
         tau.get("failed").add(new Transition("Lifecycle/release",none,none,"unavailable"));
         tau.get(failedDependencies).add(new Transition("Lifecycle/stop",none,none,"stopped"));
                 
