@@ -23,5 +23,10 @@ The current and target state of an application _app_ previously added to the **m
 
 #### Retrieving plans
 Once the current and target state of an application _app_ have been set, the **management analyser** permits retrieving the sequence of operations allowing _app_ to move from the current state to the target one. Such a sequence can be retrieved by issuing
-* a GET request to the `{host}/mm/SoftcareApp` endpoint.
-The body of the reply of such requests will be as that in [GET-reply](https://github.com/di-unipi-socc/management-analyser-ws/blob/master/data/examples/softcare-byon/GET-reply.json)
+* a GET request to the `{host}/mm/app/plan` endpoint.
+The body of the reply of such requests will be as that in [GET-plan-reply](https://github.com/di-unipi-socc/management-analyser-ws/blob/master/data/examples/softcare-byon/GET-plan-reply.json)
+
+#### Retrieving parallelly executable steps
+To retrieve a set of operations to be executed in parallel on _app_ to update the current state to a state closer to the target state, please issue
+* a GET request to the `{host}/mm/app/psteps` endpoint.
+The body of the reply of such requests will be as that in [GET-psteps-reply](https://github.com/di-unipi-socc/management-analyser-ws/blob/master/data/examples/softcare-byon/GET-psteps-reply.json)

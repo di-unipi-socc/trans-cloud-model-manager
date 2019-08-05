@@ -1,0 +1,14 @@
+{
+  "parallelSteps": [
+    {
+      "node": "Forum",
+      "operation": "start",
+      "interface": "Lifecycle"
+    },
+    {
+      "node": "SoftcareDB",
+      "operation": "start",
+      "interface": "Lifecycle"
+    }
+  ]
+}

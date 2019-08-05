@@ -10,6 +10,10 @@ By default, the current and target state of the management planning are set to t
 * a PUT request to the `{host}/mm/SoftcareApp/plan` endpoint,
 * whose body is (similar to that) in [PUT-body](https://github.com/di-unipi-socc/management-analyser-ws/blob/master/data/examples/softcare-byon/PUT-body.json)
 
-Then, to retrieve the list of operations allowing _Softcare_ to move from the specified current state to the specified target state, please issue
-* a GET request to the `{host}/mm/SoftcareApp` endpoint.
-The body of the reply of such requests will be as that in [GET-reply](https://github.com/di-unipi-socc/management-analyser-ws/blob/master/data/examples/softcare-byon/GET-reply.json)
+Then, to retrieve the sequential plan allowing _Softcare_ to move from the specified current state to the specified target state, please issue
+* a GET request to the `{host}/mm/SoftcareApp/plan` endpoint.
+The body of the reply of such requests will be as that in [GET-plan-reply](https://github.com/di-unipi-socc/management-analyser-ws/blob/master/data/examples/softcare-byon/GET-plan-reply.json)
+
+Instead, to retrieve a set of operations to be executed in parallel on _Softcare_ to update the current state to a state closer to the target state, please issue
+* a GET request to the `{host}/mm/SoftcareApp/psteps` endpoint.
+The body of the reply of such requests will be as that in [GET-psteps-reply](https://github.com/di-unipi-socc/management-analyser-ws/blob/master/data/examples/softcare-byon/GET-psteps-reply.json)
