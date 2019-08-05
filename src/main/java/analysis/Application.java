@@ -9,8 +9,8 @@ public class Application {
     
     // List of nodes, each with its own management protocol
     private final List<Node> nodes;
-    // Binding of each requirement ("nodeName/reqName") with
-    // the list of capabilities ("nodeName/capName") satisfying it 
+    // Binding of each requirement ("nodeName.reqName") with
+    // the list of capabilities ("nodeName.capName") satisfying it 
     private final Map<String,List<String>> binding;
     
     private final Planner planner;
