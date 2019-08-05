@@ -2,14 +2,17 @@ package analysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Planner {
     
     // Application topology
     private final List<Node> nodes;
     private final Map<String,List<String>> binding;
+    private final Map<String,Set<String>> dependencies;
     // List of all possible global states
     private final List<GlobalState> globalStates;
     
@@ -17,10 +20,11 @@ public class Planner {
     private GlobalState current;
     private GlobalState target;
     
-    public Planner(List<Node> nodes, Map<String,List<String>> binding) {
+    public Planner(List<Node> nodes, Map<String,List<String>> binding, Map<String,Set<String>> dependencies) {
         // Storing topology
         this.nodes = nodes;
         this.binding = binding;
+        this.dependencies = dependencies;
         
         // Generating all global states and all possible steps between them
         this.globalStates = generateGlobalStates(nodes);
@@ -243,6 +247,57 @@ public class Planner {
             }
         }
         return opSequence;
+    }
+    
+    // Method for retrieving a set of parallel steps, executable in "current"
+    // and allowing to move towards "target"
+    public List<String> getParallelSteps() {
+        List<String> parSteps = new ArrayList<String>();
+        
+        // Computing the sequential "plan"
+        List<String> plan = getSequentialPlan();
+        
+        // Returning no step if "plan" is empty
+        if(plan.isEmpty()) return parSteps;
+        
+        // Getting the first step of "plan" (executable by definition)
+        Iterator<String> planIter = plan.iterator();
+        parSteps.add(planIter.next());
+        
+        // Getting steps of "plan" executable in parallel with the first one
+        // (1) since they are executable in "current" and 
+        // (2) since they apply to nodes not depending one another
+        while(planIter.hasNext()) {
+            // Getting potential "step"
+            String step = planIter.next();
+            String stepNode = step.split("/")[0];
+            Set<String> stepNodeDeps = dependencies.get(stepNode);
+            
+            // Checking conditions for adding "step" to "parSteps"             
+            boolean toBeAdded = false;
+            
+            // (1) Adding "step" only if executable in current
+            for(Step s : current.getSteps()) {
+                if(s.getReason().equals(step)) 
+                    toBeAdded = true;
+            }
+            
+            // If condition (1) holds
+            if(toBeAdded) {
+                // (2) Adding "step" only if (the node corresponding to) "step" does
+                // not depend on (the nodes corresponding to) the steps in "parSteps"
+                // (and if the viceversa also holds)
+                for(String parStep : parSteps) {
+                    String parStepNode = parStep.split("/")[0];
+                    Set<String> parStepNodeDeps = dependencies.get(parStepNode);
+                    if(stepNodeDeps.contains(parStepNode) || parStepNodeDeps.contains(stepNode))
+                        toBeAdded = false;
+                }
+            }
+            // "step" added if both (1) and (2) hold
+            if(toBeAdded) parSteps.add(step);
+        }
+        return parSteps;
     }
     
     // Private method for searching a global state corresponding to a given

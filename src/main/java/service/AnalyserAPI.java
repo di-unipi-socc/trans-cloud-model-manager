@@ -218,7 +218,6 @@ public class AnalyserAPI {
     
     // Method for retrieving a plan allowing to change the configuration of 
     // "appName" from the "current" global state to a "target" global state
-    // ("current" and "target" are represented in JSON in "body")
     @GET
     @Path("/{appName}/plan")
     public Response getPlan(@PathParam("appName") String name) {
@@ -247,6 +246,46 @@ public class AnalyserAPI {
         }
         return Response.status(Status.OK)
                 .entity(p)
+                .build();        
+    }
+
+    // Method for retrieving a set of parallel steps change the configuration of 
+    // "appName" from the "current" global state to a global state closer to 
+    // the "target" global state
+    @GET
+    @Path("/{appName}/psteps")
+    public Response getParallelSteps(@PathParam("appName") String name) {
+        
+        // Processing input parameters
+        Application app = this.apps.get(name);
+        if(app==null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        // Computing the plan
+        List<String> pSteps = app.getParallelSteps();
+        
+        // DEBUGGING - start
+        for(String step : pSteps){
+            System.out.println(step);
+        }
+        // DEBUGGING - stop
+        
+        // If parallel steps are not found, return error
+        if(pSteps == null)
+            return Response.status(Status.NOT_FOUND).build();
+        
+        // Otherwise, return the parallel steps
+        ParallelSteps psteps = new ParallelSteps(new ArrayList());
+        for(String op : pSteps) {
+            String[] opSplit = op.split("/");
+            String nodeName = opSplit[0];
+            String intfName = opSplit[1];
+            String opName = opSplit[2];
+            psteps.addStep(nodeName, intfName, opName);
+        }
+        return Response.status(Status.OK)
+                .entity(psteps)
                 .build();        
     }
     

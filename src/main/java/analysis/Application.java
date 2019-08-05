@@ -53,7 +53,7 @@ public class Application {
 //        // DEBUGGING - end
         
         // Computing all possible plans from each global state to each other
-        this.planner = new Planner(this.nodes,this.binding);
+        this.planner = new Planner(this.nodes,this.binding,this.dependencies);
     }
    
     private Set<String> computeDependencies(String node) {
@@ -70,7 +70,6 @@ public class Application {
                     if(!dependencies.containsKey(targetNode))
                         dependencies.put(targetNode,computeDependencies(targetNode));
                     Set<String> recursiveDependencies = dependencies.get(targetNode);
-                    System.out.println(node + "," + targetNode + " - " + recursiveDependencies);
                     nodeDependencies.addAll(recursiveDependencies);                
                 }
             }
@@ -90,16 +89,16 @@ public class Application {
         return planner.getSequentialPlan();
     }
     
+    public List<String> getParallelSteps() {
+        return planner.getParallelSteps();
+    } 
+    
     public void setCurrent(Map<String,String> globalState) {
         this.planner.setCurrent(globalState);
     }
     
     public void setTarget(Map<String,String> globalState) {
         this.planner.setTarget(globalState);
-    }
-
-    public boolean dependsOn(String sourceNode, String targetNode) {
-        return dependencies.get(sourceNode).contains(targetNode);
     }
     
     @Override
