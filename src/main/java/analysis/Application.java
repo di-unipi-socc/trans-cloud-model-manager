@@ -98,6 +98,10 @@ public class Application {
         this.planner.setTarget(globalState);
     }
 
+    public boolean dependsOn(String sourceNode, String targetNode) {
+        return dependencies.get(sourceNode).contains(targetNode);
+    }
+    
     @Override
     public String toString() {
         return "** NODES **\n" + nodes.toString() + 
