@@ -2,16 +2,21 @@ package analysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Application {
     
     // List of nodes, each with its own management protocol
     private final List<Node> nodes;
-    // Binding of each requirement ("nodeName.reqName") with
-    // the list of capabilities ("nodeName.capName") satisfying it 
+    // Binding of each requirement ("nodeName/reqName") with
+    // the list of capabilities ("nodeName/capName") satisfying it 
     private final Map<String,List<String>> binding;
+    // Map modelling inter-node dependencies, with each "node" being mapped
+    // to the set of nodes it depends on (directly, and through other nodes)
+    private final Map<String,Set<String>> dependencies;
     
     private final Planner planner;
     
@@ -31,10 +36,48 @@ public class Application {
         // Updating binding
         this.binding = binding;
         
+        // Computing all depedencies
+        dependencies = new HashMap<String,Set<String>>();
+        for(String nodeName : nodeNames) {
+            if(!dependencies.containsKey(nodeName))
+                dependencies.put(nodeName,computeDependencies(nodeName));
+        }
+//        // DEBUGGING - start
+//        for(String nodeName : nodeNames) {
+//            System.out.println("Node: " + nodeName);
+//            System.out.println("Dependency:");
+//            for(String dependency : dependencies.get(nodeName))
+//                System.out.println("  - " + dependency);
+//            System.out.println("");
+//        }
+//        // DEBUGGING - end
+        
         // Computing all possible plans from each global state to each other
         this.planner = new Planner(this.nodes,this.binding);
     }
    
+    private Set<String> computeDependencies(String node) {
+        Set<String> nodeDependencies = new HashSet<String>();
+        // Getting dependencies on other nodes from "binding"
+        for(String source : binding.keySet()) {
+            String sourceNode = source.split("/")[0];
+            if(sourceNode.equals(node)) {
+                for (String target : binding.get(source)) {
+                    String targetNode = target.split("/")[0];
+                    // Adding direct dependency on "targetNode"
+                    nodeDependencies.add(targetNode);
+                    // Getting recursive dependencies
+                    if(!dependencies.containsKey(targetNode))
+                        dependencies.put(targetNode,computeDependencies(targetNode));
+                    Set<String> recursiveDependencies = dependencies.get(targetNode);
+                    System.out.println(node + "," + targetNode + " - " + recursiveDependencies);
+                    nodeDependencies.addAll(recursiveDependencies);                
+                }
+            }
+        }
+        return nodeDependencies;
+    }
+
     public List<Node> getNodes() {
         return nodes;
     }
@@ -45,10 +88,6 @@ public class Application {
     
     public List<String> getSequentialPlan() {
         return planner.getSequentialPlan();
-    }
-    
-    public List<String> boundTo(String node, String requirement) {
-        return binding.get(node + "." + requirement);
     }
     
     public void setCurrent(Map<String,String> globalState) {
